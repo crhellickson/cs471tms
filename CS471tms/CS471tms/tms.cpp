@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm> // for std::sort
 
 using std::cout;
 using std::cin;
@@ -28,7 +29,100 @@ public:
 	string archivedAnswer;
 };
 
+//for use in std::sort when sorting tasks in a vector
+//by priority
+struct ComparePriority
+{
+	bool operator()(Task & a, Task & b)
+	{
+		return a.priority < b.priority;
+	}
+};
+
 vector <Task> TaskList;
+
+void loadTasks()
+{
+	//open tasklist.txt and go though it to populate the vector of current tasks
+	Task tempTask;
+	vector<Task> loadedTasks;
+	ifstream taskFile("tasklist.txt");
+	string line;
+	string attributeIdentifier;
+	
+	//Get a line from the file 
+	while (getline(taskFile, line))
+	{
+		attributeIdentifier.clear();
+		attributeIdentifier += line[0];
+		attributeIdentifier += line[1];
+		attributeIdentifier += line[2];
+		if (attributeIdentifier == "NAM")
+		{
+			line.erase(line.begin(), line.begin() + 5); //Name: is 5 characters long save the rest of the line for Task object
+			tempTask.taskName = line;
+		}
+		else if (attributeIdentifier == "DES")
+		{
+			line.erase(line.begin(), line.begin() + 11); //DESCRIPTION: is 11 characters long
+			tempTask.description = line;
+		}
+		else if (attributeIdentifier == "PRI")
+		{
+			line.erase(line.begin(), line.begin() + 9); // PRIORITY: is 9 characters long
+			tempTask.priority = atoi(line.c_str());
+		}
+		else if (attributeIdentifier == "DEP")
+		{
+			line.erase(line.begin(), line.begin() + 11);  // DEPENDENCE: is 11 characters long
+			tempTask.dependance = line;
+		}
+		else if (attributeIdentifier == "DUE")
+		{
+			line.erase(line.begin(), line.begin() + 8); //DUEDATE: is 8 characters long
+			tempTask.dueDate = atoi(line.c_str());
+		}
+		else if (attributeIdentifier == "WOR")
+		{
+			line.erase(line.begin(), line.begin() + 10); //WORKINGON: is 10 characters long
+			if (line == "t")
+			{
+				tempTask.working = true;
+			}
+			else
+			{
+				tempTask.working = false;
+			}
+		}
+		else if (attributeIdentifier == "TIM")
+		{
+			line.erase(line.begin(), line.begin() + 10 ); //TIMEALLOC: is 10 characters long
+			tempTask.talloc = atoi(line.c_str());
+		}
+		else if (attributeIdentifier == "ARC")
+		{
+			line.erase(line.begin(), line.begin() + 9); //ARCHIVED: is 9 characters long
+			if (line == "t")
+			{
+				tempTask.archived = true;
+			}
+			else
+			{
+				tempTask.archived = false;
+			}
+		}
+		else
+		{
+			cout << endl << "Something went wrong.  This message should never be seen!";
+		}
+
+		//Put the loaded task into the vector
+		loadedTasks.push_back(tempTask);
+	}
+	//Sort the task list by priority for display
+	sort(loadedTasks.begin(), loadedTasks.end(), ComparePriority());
+}
+
 
 void displayTaskList()
 {
@@ -120,13 +214,13 @@ void createTask()
 		if (NewTask.workingAnswer == "t")
 		{
 			NewTask.working = true;
-			existingTaskFile << "WORKING ON:" << "t" << "\n";
+			existingTaskFile << "WORKINGON:" << "t" << "\n";
 
 		}
 		else
 		{
 			NewTask.working = false;
-			existingTaskFile << "WORKING ON:" << "f" << "\n";
+			existingTaskFile << "WORKINGON:" << "f" << "\n";
 		}
 
 		cout << "TIME ALLOCATED IN MINUTES : ";
@@ -196,13 +290,13 @@ void createTask()
 			if (FirstTask.workingAnswer == "t")
 			{
 				FirstTask.working = true;
-				newTaskFile << "WORKING ON:" << "t" << "\n";
+				newTaskFile << "WORKINGON:" << "t" << "\n";
 
 			}
 			else
 			{
 				FirstTask.working = false;
-				newTaskFile << "WORKING ON:" << "f" << "\n";
+				newTaskFile << "WORKINGON:" << "f" << "\n";
 			}
 			
 			cout << "TIME ALLOCATED IN MINUTES : ";
@@ -275,6 +369,10 @@ void displayMainMenu()
 	else if (userAnswer == "displaytasklist")
 	{
 		displayTaskList();
+	}
+	else if (userAnswer == "exit")
+	{
+		return;
 	}
 	else
 	{
