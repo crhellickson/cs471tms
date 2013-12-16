@@ -1,8 +1,9 @@
-NAME:Go to the grocery store
-DESCRIPTION:lah blah blah
-PRIORITY:1
+NAME:This is a task
+DESCRIPTION:This is a description
+PRIORITY:2
 DEPENDENCE:none
-DUEDATE:88
+DUEDATE:11132013
 WORKINGON:t
 TIMEALLOC:0
-ARCHIVED:t
+ARCHIVED:f
+END

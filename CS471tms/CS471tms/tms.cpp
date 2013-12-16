@@ -27,6 +27,7 @@ public:
 	int talloc;
 	bool archived;
 	string archivedAnswer;
+	
 };
 
 //for use in std::sort when sorting tasks in a vector
@@ -41,22 +42,61 @@ struct ComparePriority
 
 vector <Task> TaskList;
 
+void searchForEnd()
+{
+	ifstream readFile("tasklist.txt");
+	ofstream taskFile("tasklist.txt",std::ios::in | std::ios::out);
+	string line;
+	string attribute;
+	while (getline(readFile,line))
+	{
+		if (line == "END")
+		{
+			taskFile << "";
+		}
+	}
+}
+
+Task & clearTask(Task & task)
+{
+	task.taskName = "";
+	task.description = "";
+	task.priority = 0;
+	task.dependance = "";
+	task.dueDate = 0;
+	task.working = false;
+	task.talloc = 0;
+	task.archived = false;
+	return task;
+}
+
 void loadTasks()
 {
 	//open tasklist.txt and go though it to populate the vector of current tasks
 	Task tempTask;
-	vector<Task> loadedTasks;
 	ifstream taskFile("tasklist.txt");
+	//If a tasklist has not yet been created
+	//there will be not tasks to load
+	if (!taskFile)
+	{
+		cout << endl <<  "There is no current task list to load.  Please create a task list." << endl;
+		displayMainMenu();
+	}
+	vector<Task> loadedTasks;
 	string line;
 	string attributeIdentifier;
 	
 	//Get a line from the file 
-	while (getline(taskFile, line))
+	while (getline(taskFile, line) && line != "END")
 	{
 		attributeIdentifier.clear();
 		attributeIdentifier += line[0];
 		attributeIdentifier += line[1];
 		attributeIdentifier += line[2];
+
+		//cout << attributeIdentifier;
+		//return;
+
 		if (attributeIdentifier == "NAM")
 		{
 			line.erase(line.begin(), line.begin() + 5); //Name: is 5 characters long save the rest of the line for Task object
@@ -105,22 +145,36 @@ void loadTasks()
 			if (line == "t")
 			{
 				tempTask.archived = true;
+				//Put the loaded task into the vector
+				loadedTasks.push_back(tempTask);
+				clearTask(tempTask);
 			}
 			else
 			{
 				tempTask.archived = false;
+				//Put the loaded task into the vector
+				loadedTasks.push_back(tempTask);
+				clearTask(tempTask);
 			}
 		}
-		else
-		{
-			cout << endl << "Something went wrong.  This message should never be seen!";
-		}
 
-		//Put the loaded task into the vector
-		loadedTasks.push_back(tempTask);
 	}
+
 	//Sort the task list by priority for display
 	sort(loadedTasks.begin(), loadedTasks.end(), ComparePriority());
+
+	//print task list
+	for (unsigned int i = 0; i<loadedTasks.size();++i)
+	{
+		cout << "NAME:" << loadedTasks[i].taskName << endl;
+		cout << "DESCRIPTION:" << loadedTasks[i].description << endl;
+		cout << "PRIORITY:" << loadedTasks[i].priority << endl;
+		cout << "DEPENDENCE:" << loadedTasks[i].dependance << endl;
+		cout << "DUEDATE:" << loadedTasks[i].dueDate << endl;
+		cout << "WORKINGON:" << loadedTasks[i].working<< endl;
+		cout << "TIMEALLOC:" << loadedTasks[i].talloc << endl;
+		cout << "ARCHIVED:" << loadedTasks[i].archived << endl << endl;
+	}
 }
 
 
@@ -179,6 +233,7 @@ void createTask()
 	if (taskFile.is_open())
 	{
 		firstTaskList = false;
+		searchForEnd();
 		cout << "Current task list file opened sucessfully" << endl << endl;
 		ofstream existingTaskFile("tasklist.txt", std::ios_base::app);
 		Task NewTask;
@@ -190,7 +245,6 @@ void createTask()
 		existingTaskFile << "NAME:" + NewTask.taskName << "\n";
 
 		cout << endl << "DESCRIPTION: ";
-		cin.ignore();
 		getline(cin, NewTask.description);
 		existingTaskFile << "DESCRIPTION:" + NewTask.description << "\n";
 
@@ -238,7 +292,7 @@ void createTask()
 		else
 		{
 			NewTask.archived = false;
-			existingTaskFile << "ARCHIVED:" << "f" << "\n" << "\n";
+			existingTaskFile << "ARCHIVED:" << "f" << "\n" << "END";
 		}
 
 		existingTaskFile.close();
@@ -266,7 +320,6 @@ void createTask()
 			newTaskFile << "NAME:" + FirstTask.taskName << "\n";
 
 			cout << endl << "DESCRIPTION: ";
-			cin.ignore();
 			getline(cin, FirstTask.description);
 			newTaskFile << "DESCRIPTION:" + FirstTask.description << "\n";
 
@@ -314,7 +367,7 @@ void createTask()
 			else
 			{
 				FirstTask.archived = false;
-				newTaskFile << "ARCHIVED:" << "f" << "\n" << "\n";
+				newTaskFile << "ARCHIVED:" << "f" << "\n" << "END";
 			}
 
 			newTaskFile.close();
@@ -344,10 +397,11 @@ void displayMainMenu()
 		cout << "------------------------------------------------------------" << endl << endl;
 
 		cout << "help: displays this page" << endl << endl;
-		cout << "displaytasklist: displays the task list by priority currently in your task list" << endl << endl;
-		cout << "createTask: creates a task list if you dont already have one or creates a new task onto your existing task list" << endl << endl;
-		cout << "modifyTask modifies a task in your existing task list" << endl << endl;
-		cout << "deleteTask deletes a task in your existing task list" << endl << endl;
+		cout << "displaytasklist: displays the task as it was written to your task file" << endl << endl;
+		cout << "displaytasklistp: displays your current task list, sorted by priority" << endl << endl;
+		cout << "createTask: creates a task list" << endl << endl;
+		cout << "modifyTask: modifies a task in your existing task list" << endl << endl;
+		cout << "deleteTask: deletes a task in your existing task list" << endl << endl;
 		cout << "menu: type this command after a completed task to return to the main menu" << endl << endl;
 
 		string secondAnswer;
@@ -373,6 +427,10 @@ void displayMainMenu()
 	else if (userAnswer == "exit")
 	{
 		return;
+	}
+	else if (userAnswer == "loadtasklist")
+	{
+		loadTasks();
 	}
 	else
 	{
