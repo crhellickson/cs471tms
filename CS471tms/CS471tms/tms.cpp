@@ -93,36 +93,42 @@ void loadTasks()
 		attributeIdentifier += line[0];
 		attributeIdentifier += line[1];
 		attributeIdentifier += line[2];
+		attributeIdentifier += line[3];
 
 		//cout << attributeIdentifier;
 		//return;
 
-		if (attributeIdentifier == "NAM")
+		if (attributeIdentifier == "NAME")
 		{
 			line.erase(line.begin(), line.begin() + 5); //Name: is 5 characters long save the rest of the line for Task object
 			tempTask.taskName = line;
 		}
-		else if (attributeIdentifier == "DES")
+		else if (attributeIdentifier == "ENDN")
+		{
+			line.erase(line.begin(), line.begin() + 8); //ENDNAME: is 8 characters long
+			tempTask.taskName = line;
+		}
+		else if (attributeIdentifier == "DESC")
 		{
 			line.erase(line.begin(), line.begin() + 11); //DESCRIPTION: is 11 characters long
 			tempTask.description = line;
 		}
-		else if (attributeIdentifier == "PRI")
+		else if (attributeIdentifier == "PRIO")
 		{
 			line.erase(line.begin(), line.begin() + 9); // PRIORITY: is 9 characters long
 			tempTask.priority = atoi(line.c_str());
 		}
-		else if (attributeIdentifier == "DEP")
+		else if (attributeIdentifier == "DEPE")
 		{
 			line.erase(line.begin(), line.begin() + 11);  // DEPENDENCE: is 11 characters long
 			tempTask.dependance = line;
 		}
-		else if (attributeIdentifier == "DUE")
+		else if (attributeIdentifier == "DUED")
 		{
 			line.erase(line.begin(), line.begin() + 8); //DUEDATE: is 8 characters long
 			tempTask.dueDate = atoi(line.c_str());
 		}
-		else if (attributeIdentifier == "WOR")
+		else if (attributeIdentifier == "WORK")
 		{
 			line.erase(line.begin(), line.begin() + 10); //WORKINGON: is 10 characters long
 			if (line == "t")
@@ -134,12 +140,12 @@ void loadTasks()
 				tempTask.working = false;
 			}
 		}
-		else if (attributeIdentifier == "TIM")
+		else if (attributeIdentifier == "TIME")
 		{
 			line.erase(line.begin(), line.begin() + 10 ); //TIMEALLOC: is 10 characters long
 			tempTask.talloc = atoi(line.c_str());
 		}
-		else if (attributeIdentifier == "ARC")
+		else if (attributeIdentifier == "ARCH")
 		{
 			line.erase(line.begin(), line.begin() + 9); //ARCHIVED: is 9 characters long
 			if (line == "t")
