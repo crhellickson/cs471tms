@@ -48,6 +48,50 @@ struct ComparePriority
 
 vector <Task> TaskList;
 
+
+void rewrite()
+{
+	//open tasklist.txt for rewriting the task list
+	ofstream taskFile("tasklist.txt");
+	//This is to destinguish whether to append to the file and use ENDNAME
+	//instead of name for the remaining tasks after the first task has been
+	//written to the file
+	bool firstTaskWritten = false;
+	
+	if (firstTaskWritten == false)
+	{
+		taskFile << "NAME:" << _loadedTasks[0].taskName << endl;
+		taskFile << "DESCRIPTION:" << _loadedTasks[0].description << endl;
+		taskFile << "PRIORITY:" << _loadedTasks[0].priority << endl;
+		taskFile << "DEPENDENCE:" << _loadedTasks[0].dependance << endl;
+		taskFile << "DUEDATE:" << _loadedTasks[0].dueDate << endl;
+		taskFile << "WORKINGON:" << _loadedTasks[0].working << endl;
+		taskFile << "TIMEALLOC:" << _loadedTasks[0].talloc << endl;
+		taskFile << "ARCHIVED:" << _loadedTasks[0].archived << endl;
+		taskFile.close();
+		firstTaskWritten = true;
+	}
+
+		//append the rest of the tasks to the file
+		ofstream appendTask("tasklist.txt", std::ios_base::app);
+
+		for (int k = 1; k < _loadedTasks.size(); ++k)
+		{
+			appendTask << "ENDNAME:" << _loadedTasks[k].taskName << endl;
+			appendTask << "DESCRIPTION:" << _loadedTasks[k].description << endl;
+			appendTask << "PRIORITY:" << _loadedTasks[k].priority << endl;
+			appendTask << "DEPENDENCE:" << _loadedTasks[k].dependance << endl;
+			appendTask << "DUEDATE:" << _loadedTasks[k].dueDate << endl;
+			appendTask << "WORKINGON:" << _loadedTasks[k].working << endl;
+			appendTask << "TIMEALLOC:" << _loadedTasks[k].talloc << endl;
+			appendTask << "ARCHIVED:" << _loadedTasks[k].archived << endl;
+		}
+		//Write End to the end of the file to stop parsing when
+		//loading tasks
+		appendTask << "END";
+		appendTask.close();
+}
+
 //NEED TO FINISH WRITING THIS
 ///////////////////////////////////////////
 vector<Task>::iterator findTask(const string & taskName)
@@ -65,8 +109,6 @@ vector<Task>::iterator findTask(const string & taskName)
 /////////////////////////////////////////////
 /////////////////////////////////////////////
 
-//NEED TO FINISH WRITING THIS
-/////////////////////////////////////////
 void modifyTask(string taskName)
 {
 	string attributeToChange;
@@ -144,25 +186,6 @@ void modifyTask(string taskName)
 	}
 	
 }
-//////////////////////////////////////////
-//////////////////////////////////////////
-
-/*
-void searchForEnd()
-{
-	ifstream readFile("tasklist.txt");
-	ofstream taskFile("tasklist.txt",std::ios::in | std::ios::out);
-	string line;
-	string attribute;
-	while (getline(readFile,line))
-	{
-		if (line == "END")
-		{
-			taskFile << "";
-		}
-	}
-}
-*/
 
 //Function that clears any information
 //in the task. This is used when parsing
@@ -547,6 +570,8 @@ void displayMainMenu()
 		cout << "Which task would you like to modify?: ";
 		getline(cin, modifyAnswer);
 		modifyTask(modifyAnswer);
+		rewrite();
+		autoBackup();
 		displayMainMenu();
 	}
 	else if (userAnswer == "createTask")
