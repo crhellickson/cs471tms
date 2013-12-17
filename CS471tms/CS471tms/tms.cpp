@@ -30,6 +30,12 @@ public:
 	
 };
 
+//NEED TO PUT THIS IN TASK CLASS LATER
+//******************************
+vector<Task> _loadedTasks;
+bool tasksLoaded = false;
+//******************************
+
 //for use in std::sort when sorting tasks in a vector
 //by priority
 struct ComparePriority
@@ -42,6 +48,106 @@ struct ComparePriority
 
 vector <Task> TaskList;
 
+//NEED TO FINISH WRITING THIS
+///////////////////////////////////////////
+vector<Task>::iterator findTask(const string & taskName)
+{
+	for (auto i = _loadedTasks.begin(); i != _loadedTasks.end();i++)
+	{
+		if (i->taskName == taskName)
+		{
+			return i;
+		}
+	}
+	cout << "The name of the task you are trying to modify does not exist" << endl;
+	return _loadedTasks.end();
+}
+/////////////////////////////////////////////
+/////////////////////////////////////////////
+
+//NEED TO FINISH WRITING THIS
+/////////////////////////////////////////
+void modifyTask(string taskName)
+{
+	string attributeToChange;
+	string line;
+	int number;
+	auto taskToModify = findTask(taskName);
+	if (taskToModify == _loadedTasks.end())
+	{
+		return;
+	}
+	cout << "What attribute do you want to modify?: ";
+	getline(cin, attributeToChange);
+	if (attributeToChange == "name")
+	{
+		cout << endl << "NAME: ";
+		getline(cin, line);
+		taskToModify->taskName = line;
+	}
+	else if (attributeToChange == "description")
+	{
+		cout << endl << "DESCRIPTION: ";
+		getline(cin, line);
+		taskToModify->description = line;
+	}
+	else if (attributeToChange == "priority")
+	{
+		cout << endl << "PRIORITY: ";
+		cin >> number;
+		taskToModify->priority = number;
+	}
+	else if (attributeToChange == "dependence")
+	{
+		cout << endl << "DEPENDENCE: ";
+		getline(cin, line);
+		taskToModify->dependance = line;
+	}
+	else if (attributeToChange == "due")
+	{
+		cout << endl << "DUEDATE: ";
+		cin >> number;
+		taskToModify->dueDate = number;
+	}
+	else if (attributeToChange == "working")
+	{
+		cout << endl << "WORKINGON: ";
+		cin >> line;
+		if (line == "t")
+		{
+			taskToModify->working = true;
+		}
+		else
+		{
+			taskToModify->working = false;
+		}
+	}
+	else if (attributeToChange == "time")
+	{
+		cout << endl << "TIMEALLOC: ";
+		cin >> number;
+		taskToModify->talloc = number;
+	}
+	else if (attributeToChange == "archived")
+	{
+		cout << endl << "ARCHIVED: ";
+		cin >> line;
+		if (line == "t")
+		{
+			taskToModify->archived = true;
+		}
+		else
+		{
+			taskToModify->archived = false;
+		}
+		
+	}
+	
+}
+//////////////////////////////////////////
+//////////////////////////////////////////
+
+/*
 void searchForEnd()
 {
 	ifstream readFile("tasklist.txt");
@@ -56,7 +162,11 @@ void searchForEnd()
 		}
 	}
 }
+*/
 
+//Function that clears any information
+//in the task. This is used when parsing
+//the file for tasks
 Task & clearTask(Task & task)
 {
 	task.taskName = "";
@@ -80,9 +190,9 @@ void loadTasks()
 	if (!taskFile)
 	{
 		cout << endl <<  "There is no current task list to load.  Please create a task list." << endl;
-		displayMainMenu();
+		return;
 	}
-	vector<Task> loadedTasks;
+	_loadedTasks.clear();
 	string line;
 	string attributeIdentifier;
 	
@@ -103,14 +213,14 @@ void loadTasks()
 			line.erase(line.begin(), line.begin() + 5); //Name: is 5 characters long save the rest of the line for Task object
 			tempTask.taskName = line;
 		}
-		else if (attributeIdentifier == "ENDN")
+		else if (attributeIdentifier == "ENDN") //This is for the case when the task parsed is not the last task in the file
 		{
 			line.erase(line.begin(), line.begin() + 8); //ENDNAME: is 8 characters long
 			tempTask.taskName = line;
 		}
 		else if (attributeIdentifier == "DESC")
 		{
-			line.erase(line.begin(), line.begin() + 11); //DESCRIPTION: is 11 characters long
+			line.erase(line.begin(), line.begin() + 12); //DESCRIPTION: is 12 characters long
 			tempTask.description = line;
 		}
 		else if (attributeIdentifier == "PRIO")
@@ -152,48 +262,56 @@ void loadTasks()
 			{
 				tempTask.archived = true;
 				//Put the loaded task into the vector
-				loadedTasks.push_back(tempTask);
+				_loadedTasks.push_back(tempTask);
 				clearTask(tempTask);
 			}
 			else
 			{
 				tempTask.archived = false;
 				//Put the loaded task into the vector
-				loadedTasks.push_back(tempTask);
+				_loadedTasks.push_back(tempTask);
 				clearTask(tempTask);
 			}
 		}
-
+		
 	}
 
 	//Sort the task list by priority for display
-	sort(loadedTasks.begin(), loadedTasks.end(), ComparePriority());
+	sort(_loadedTasks.begin(), _loadedTasks.end(), ComparePriority());
 
 	//print task list
-	for (unsigned int i = 0; i<loadedTasks.size();++i)
+	for (unsigned int i = 0; i<_loadedTasks.size();++i)
 	{
-		cout << "NAME:" << loadedTasks[i].taskName << endl;
-		cout << "DESCRIPTION:" << loadedTasks[i].description << endl;
-		cout << "PRIORITY:" << loadedTasks[i].priority << endl;
-		cout << "DEPENDENCE:" << loadedTasks[i].dependance << endl;
-		cout << "DUEDATE:" << loadedTasks[i].dueDate << endl;
-		cout << "WORKINGON:" << loadedTasks[i].working<< endl;
-		cout << "TIMEALLOC:" << loadedTasks[i].talloc << endl;
-		cout << "ARCHIVED:" << loadedTasks[i].archived << endl << endl;
+		cout << "NAME:" << _loadedTasks[i].taskName << endl;
+		cout << "DESCRIPTION:" << _loadedTasks[i].description << endl;
+		cout << "PRIORITY:" << _loadedTasks[i].priority << endl;
+		cout << "DEPENDENCE:" << _loadedTasks[i].dependance << endl;
+		cout << "DUEDATE:" << _loadedTasks[i].dueDate << endl;
+		cout << "WORKINGON:" << _loadedTasks[i].working<< endl;
+		cout << "TIMEALLOC:" << _loadedTasks[i].talloc << endl;
+		cout << "ARCHIVED:" << _loadedTasks[i].archived << endl << endl;
 	}
+	
 }
 
-
+//Method that displays the task list in the order in which the tasks were added
+//They are not sorted by any means when put into the file
 void displayTaskList()
 {
-	ifstream taskList("tasklist.txt");
-	string line;
-	while (getline(taskList, line))
+	//Sort the task list by priority for display
+	sort(_loadedTasks.begin(), _loadedTasks.end(), ComparePriority());
+
+	for (auto i : _loadedTasks)
 	{
-		cout << line << endl;
+		cout << "NAME: " << i.taskName << endl;
+		cout << "DESCRIPTION: " << i.description << endl;
+		cout << "PRIORITY: " << i.priority << endl;
+		cout << "DEPENDENCE: " << i.dependance << endl;
+		cout << "DUEDATE: " << i.dueDate << endl;
+		cout << "WORKINGON: " << i.working << endl;
+		cout << "TIMEALLOC: " << i.talloc << endl;
+		cout << "ARCHIVED: " << i.archived << endl << endl;
 	}
-	cout << endl;
-	displayMainMenu();
 }
 
 void autoBackup()
@@ -239,7 +357,7 @@ void createTask()
 	if (taskFile.is_open())
 	{
 		firstTaskList = false;
-		searchForEnd();
+		//searchForEnd();
 		cout << "Current task list file opened sucessfully" << endl << endl;
 		ofstream existingTaskFile("tasklist.txt", std::ios_base::app);
 		Task NewTask;
@@ -422,6 +540,15 @@ void displayMainMenu()
 			displayTaskList();
 		}
 	}
+	else if (userAnswer == "modifyTask")
+	{
+		string modifyAnswer;
+		cin.ignore();
+		cout << "Which task would you like to modify?: ";
+		getline(cin, modifyAnswer);
+		modifyTask(modifyAnswer);
+		displayMainMenu();
+	}
 	else if (userAnswer == "createTask")
 	{
 		createTask();
@@ -429,14 +556,23 @@ void displayMainMenu()
 	else if (userAnswer == "displaytasklist")
 	{
 		displayTaskList();
+		displayMainMenu();
 	}
 	else if (userAnswer == "exit")
 	{
 		return;
 	}
-	else if (userAnswer == "loadtasklist")
+	else if (userAnswer == "loadtasklist" && tasksLoaded == false)
 	{
+		tasksLoaded = true;
 		loadTasks();
+		displayMainMenu();
+	}
+	else if (userAnswer == "loadtasklist" && tasksLoaded == true)
+	{
+		cout << "The task list has already been loaded into memory." << endl;
+		cout << "To look at your task list please type displaytasklist" << endl << endl;
+		displayMainMenu();
 	}
 	else
 	{
