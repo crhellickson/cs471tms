@@ -18,8 +18,13 @@ using std::ifstream;
 using std::string;
 using std::vector;
 
+//Function prototype so that all fucctions in file
+//can see the menu function
 void displayMainMenu();
 
+//Class for Task objects
+//with the associated filds as 
+//member variables
 class Task
 {
 public:
@@ -36,12 +41,10 @@ public:
 	
 };
 
-//NEED TO PUT THIS IN TASK CLASS LATER
-//******************************
 vector<Task> _loadedTasks;
 bool tasksLoaded = false;
 vector <Task> TaskList;
-//******************************
+
 
 //for use in std::sort when sorting tasks in a vector
 //by priority
@@ -53,6 +56,8 @@ struct ComparePriority
 	}
 };
 
+//Function to update the time of currently working tasks at the end
+//of the time the user closes the program.
 void updateWorkingTasks(int elapsedTime)
 {
 	for (unsigned int w = 0; w < _loadedTasks.size(); ++w)
@@ -64,6 +69,8 @@ void updateWorkingTasks(int elapsedTime)
 	}
 }
 
+//Function to dispay the help menu
+//this is a subfunction of the main menu
 void displayHelpMenu()
 {
 	cout << "------------------------------------------------------------" << endl << endl;
@@ -79,6 +86,8 @@ void displayHelpMenu()
 	cout << "deleteTask: deletes a task in your existing task list" << endl << endl;
 }
 
+//Function that rewrites the changes to the users tasklist.txt file once there has been
+//a change to the task list in memory.  By in memory we mean inside the _loadedTasks vector.
 void rewrite()
 {
 	//open tasklist.txt for rewriting the task list
@@ -122,7 +131,7 @@ void rewrite()
 		appendTask.close();
 }
 
-
+//Function that finds a task within the _loadedTasks vector of Task objects
 vector<Task>::iterator findTask(const string & taskName)
 {
 	for (auto i = _loadedTasks.begin(); i != _loadedTasks.end();i++)
@@ -136,6 +145,7 @@ vector<Task>::iterator findTask(const string & taskName)
 	return _loadedTasks.end();
 }
 
+//Function that deletes a task that was requested by the user
 void deleteTask(string & taskName)
 {
 	auto taskToDelete = findTask(taskName);
@@ -153,7 +163,9 @@ void deleteTask(string & taskName)
 	}
 }
 
-
+//Function that modifys a task that the user specifies
+//The task list that it modifies is the task list that resides
+//in the _loadedTasks vector of Tasks
 void modifyTask(string taskName)
 {
 	string attributeToChange;
@@ -248,6 +260,8 @@ Task & clearTask(Task & task)
 	return task;
 }
 
+//Function that parses the users tasklist.txt file and loads
+//the tasks that it finds into a vector titled _loadedTasks
 void loadTasks()
 {
 	//open tasklist.txt and go though it to populate the vector of current tasks
@@ -272,9 +286,6 @@ void loadTasks()
 		attributeIdentifier += line[1];
 		attributeIdentifier += line[2];
 		attributeIdentifier += line[3];
-
-		//cout << attributeIdentifier;
-		//return;
 
 		if (attributeIdentifier == "NAME")
 		{
@@ -400,6 +411,10 @@ void displayArchivedTasks()
 	}
 }
 
+//Function that either creates an autobackup.txt file if the user
+//does not already have one, or uses the existing autobackup.txt file
+//to backup the changes to either the physical task list file or the task
+//list that resides in the vector _loadedTasks
 void autoBackup()
 {
 	bool backupExists = false;
@@ -436,6 +451,9 @@ void autoBackup()
 	backupExists = true;
 }
 
+
+//Function that is used to create a task and output it to the users tasklist.txt file
+//if the user does not already have one one will be created for them.
 void createTask()
 {
 	bool firstTaskList;
@@ -592,6 +610,8 @@ void createTask()
 	
 }
 
+
+//Function that displays the main menu for TMS
 void displayMainMenu()
 {
 	cout << "------------------------------------------" << endl << endl;
