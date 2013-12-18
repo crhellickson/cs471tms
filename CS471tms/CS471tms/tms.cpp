@@ -1,8 +1,14 @@
+/*
+	AUTHOR: Caleb Hellickson
+	PURPOSE: CS471 TO-DO LIST PROJECT
+*/
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <algorithm> // for std::sort
+#include <time.h>  // to keep track of the elapsed time 
 
 using std::cout;
 using std::cin;
@@ -34,6 +40,7 @@ public:
 //******************************
 vector<Task> _loadedTasks;
 bool tasksLoaded = false;
+vector <Task> TaskList;
 //******************************
 
 //for use in std::sort when sorting tasks in a vector
@@ -46,8 +53,30 @@ struct ComparePriority
 	}
 };
 
-vector <Task> TaskList;
+void updateWorkingTasks(int elapsedTime)
+{
+	for (unsigned int w = 0; w < _loadedTasks.size(); ++w)
+	{
+		if (_loadedTasks[w].working == true)
+		{
+			_loadedTasks[w].talloc += elapsedTime;
+		}
+	}
+}
 
+void displayHelpMenu()
+{
+	cout << "------------------------------------------------------------" << endl << endl;
+	cout << "Here are the commands you can enter to interact with the TMS:" << endl << endl;
+	cout << "------------------------------------------------------------" << endl << endl;
+
+	cout << "help: displays this page" << endl << endl;
+	cout << "displaytasklist: displays the task as it was written to your task file" << endl << endl;
+	cout << "displaytasklista: displays the tasks that you have previously archived" << endl << endl;
+	cout << "createTask: creates a task list" << endl << endl;
+	cout << "modifyTask: modifies a task in your existing task list" << endl << endl;
+	cout << "deleteTask: deletes a task in your existing task list" << endl << endl;
+}
 
 void rewrite()
 {
@@ -75,7 +104,7 @@ void rewrite()
 		//append the rest of the tasks to the file
 		ofstream appendTask("tasklist.txt", std::ios_base::app);
 
-		for (int k = 1; k < _loadedTasks.size(); ++k)
+		for (unsigned int k = 1; k < _loadedTasks.size(); ++k)
 		{
 			appendTask << "ENDNAME:" << _loadedTasks[k].taskName << endl;
 			appendTask << "DESCRIPTION:" << _loadedTasks[k].description << endl;
@@ -92,8 +121,7 @@ void rewrite()
 		appendTask.close();
 }
 
-//NEED TO FINISH WRITING THIS
-///////////////////////////////////////////
+
 vector<Task>::iterator findTask(const string & taskName)
 {
 	for (auto i = _loadedTasks.begin(); i != _loadedTasks.end();i++)
@@ -106,8 +134,24 @@ vector<Task>::iterator findTask(const string & taskName)
 	cout << "The name of the task you are trying to modify does not exist" << endl;
 	return _loadedTasks.end();
 }
-/////////////////////////////////////////////
-/////////////////////////////////////////////
+
+void deleteTask(string & taskName)
+{
+	auto taskToDelete = findTask(taskName);
+	if (taskToDelete == _loadedTasks.end())
+	{
+		return;
+	}
+	if (taskToDelete->talloc == 0)
+	{
+		_loadedTasks.erase(taskToDelete);
+	}
+	else
+	{
+		cout << endl << "You cannot delete a task that you have time allocated to" << endl;
+	}
+}
+
 
 void modifyTask(string taskName)
 {
@@ -337,6 +381,24 @@ void displayTaskList()
 	}
 }
 
+void displayArchivedTasks()
+{
+	for (auto x : _loadedTasks)
+	{
+		if (x.archived == true)
+		{
+			cout << "NAME: " << x.taskName << endl;
+			cout << "DESCRIPTION: " << x.description << endl;
+			cout << "PRIORITY: " << x.priority << endl;
+			cout << "DEPENDENCE: " << x.dependance << endl;
+			cout << "DUEDATE: " << x.dueDate << endl;
+			cout << "WORKINGON: " << x.working << endl;
+			cout << "TIMEALLOC: " << x.talloc << endl;
+			cout << "ARCHIVED: " << x.archived << endl << endl;
+		}
+	}
+}
+
 void autoBackup()
 {
 	bool backupExists = false;
@@ -524,7 +586,7 @@ void createTask()
 			autoBackup();
 		}
 	}
-	displayMainMenu();
+	
 }
 
 void displayMainMenu()
@@ -539,29 +601,8 @@ void displayMainMenu()
 	cout << endl << endl;
 	if (userAnswer == "help")
 	{
-		cout << "------------------------------------------------------------" << endl << endl;
-		cout << "Here are the commands you can enter to interact with the TMS:" << endl << endl;
-		cout << "------------------------------------------------------------" << endl << endl;
-
-		cout << "help: displays this page" << endl << endl;
-		cout << "displaytasklist: displays the task as it was written to your task file" << endl << endl;
-		cout << "displaytasklistp: displays your current task list, sorted by priority" << endl << endl;
-		cout << "createTask: creates a task list" << endl << endl;
-		cout << "modifyTask: modifies a task in your existing task list" << endl << endl;
-		cout << "deleteTask: deletes a task in your existing task list" << endl << endl;
-		cout << "menu: type this command after a completed task to return to the main menu" << endl << endl;
-
-		string secondAnswer;
-		cout << "What do you want to do?: ";
-		cin >> secondAnswer;
-		if (secondAnswer == "createTask")
-		{
-			createTask();
-		}
-		else if (secondAnswer == "displaytasklist")
-		{
-			displayTaskList();
-		}
+		displayHelpMenu();
+		displayMainMenu();
 	}
 	else if (userAnswer == "modifyTask")
 	{
@@ -574,13 +615,31 @@ void displayMainMenu()
 		autoBackup();
 		displayMainMenu();
 	}
+	else if (userAnswer == "deleteTask")
+	{
+		string deleteAnswer;
+		cin.ignore();
+		cout << "Which task would you like to delete?: ";
+		getline(cin, deleteAnswer);
+		deleteTask(deleteAnswer);
+		rewrite();
+		autoBackup();
+		displayMainMenu();
+	}
 	else if (userAnswer == "createTask")
 	{
 		createTask();
+		loadTasks();
+		displayMainMenu();
 	}
 	else if (userAnswer == "displaytasklist")
 	{
 		displayTaskList();
+		displayMainMenu();
+	}
+	else if (userAnswer == "displaytasklista")
+	{
+		displayArchivedTasks();
 		displayMainMenu();
 	}
 	else if (userAnswer == "exit")
@@ -608,7 +667,15 @@ void displayMainMenu()
 
 int main()
 {
+	time_t start = clock();
 	displayMainMenu();
+	time_t end = clock();
+	int elapsed((int)end - (int)start);
+	int seconds = elapsed / CLOCKS_PER_SEC;
+	int minutes = seconds / 60;
+	updateWorkingTasks(minutes);
+	rewrite();
+	cout << endl << endl << minutes << " minutes have elapsed." << endl << endl;
 	system("pause");
 	return 0;
 }
