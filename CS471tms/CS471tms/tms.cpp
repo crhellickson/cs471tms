@@ -57,7 +57,7 @@ void updateWorkingTasks(int elapsedTime)
 {
 	for (unsigned int w = 0; w < _loadedTasks.size(); ++w)
 	{
-		if (_loadedTasks[w].working == true)
+		if (_loadedTasks[w].working == true && _loadedTasks[w].archived == false)
 		{
 			_loadedTasks[w].talloc += elapsedTime;
 		}
@@ -71,7 +71,8 @@ void displayHelpMenu()
 	cout << "------------------------------------------------------------" << endl << endl;
 
 	cout << "help: displays this page" << endl << endl;
-	cout << "displaytasklist: displays the task as it was written to your task file" << endl << endl;
+	cout << "loadtasklist: loads the tasks that are in your current task list into memory" << endl << endl;
+	cout << "displaytasklist: displays your current task list sorted by priority" << endl << endl;
 	cout << "displaytasklista: displays the tasks that you have previously archived" << endl << endl;
 	cout << "createTask: creates a task list" << endl << endl;
 	cout << "modifyTask: modifies a task in your existing task list" << endl << endl;
@@ -466,12 +467,12 @@ void createTask()
 		getline(cin, NewTask.dependance);
 		existingTaskFile << "DEPENDENCE:" << NewTask.dependance << "\n";
 
-		cout << "DUEDATE(e.g 11132013): ";
+		cout << endl << "DUEDATE(e.g 11132013): ";
 		cin >> NewTask.dueDate;
 		existingTaskFile << "DUEDATE:" << NewTask.dueDate << "\n";
 
 
-		cout << "CURRENTLY WORKING ON?(t or f): ";
+		cout << endl << "CURRENTLY WORKING ON?(t or f): ";
 		cin.ignore();
 		getline(cin, NewTask.workingAnswer);
 		if (NewTask.workingAnswer == "t")
@@ -486,13 +487,14 @@ void createTask()
 			existingTaskFile << "WORKINGON:" << "f" << "\n";
 		}
 
-		cout << "TIME ALLOCATED IN MINUTES : ";
+		cout << endl << "TIME ALLOCATED IN MINUTES : ";
 		cin >> NewTask.talloc;
 		existingTaskFile << "TIMEALLOC:" << NewTask.talloc << "\n";
 
-		cout << "ARCHIVED?(t or f): ";
+		cout << endl << "ARCHIVED?(t or f): ";
 		cin.ignore();
 		getline(cin, NewTask.archivedAnswer);
+		cout << endl << endl;
 		if (NewTask.archivedAnswer == "t")
 		{
 			NewTask.archived = true;
@@ -541,12 +543,12 @@ void createTask()
 			getline(cin, FirstTask.dependance);
 			newTaskFile << "DEPENDENCE:" << FirstTask.dependance << "\n";
 
-			cout << "DUEDATE(e.g 11132013): ";
+			cout << endl << "DUEDATE(e.g 11132013): ";
 			cin  >> FirstTask.dueDate;
 			newTaskFile << "DUEDATE:" << FirstTask.dueDate << "\n";
 
 
-			cout << "CURRENTLY WORKING ON?(t or f): ";
+			cout << endl << "CURRENTLY WORKING ON?(t or f): ";
 			cin.ignore();
 			getline(cin, FirstTask.workingAnswer);
 			if (FirstTask.workingAnswer == "t")
@@ -561,13 +563,14 @@ void createTask()
 				newTaskFile << "WORKINGON:" << "f" << "\n";
 			}
 			
-			cout << "TIME ALLOCATED IN MINUTES : ";
+			cout << endl << "TIME ALLOCATED IN MINUTES : ";
 			cin  >> FirstTask.talloc;
 			newTaskFile << "TIMEALLOC:" << FirstTask.talloc << "\n";
 
-			cout << "ARCHIVED?(t or f): ";
+			cout << endl << "ARCHIVED?(t or f): ";
 			cin.ignore();
 			getline(cin, FirstTask.archivedAnswer);
+			cout << endl << endl;
 			if (FirstTask.archivedAnswer == "t")
 			{
 				FirstTask.archived = true;
@@ -592,7 +595,7 @@ void createTask()
 void displayMainMenu()
 {
 	cout << "------------------------------------------" << endl << endl;
-	cout << "Welcome to Task Mangement Software (TMS)" << endl << endl;
+	cout << "Welcome to Task Management Software (TMS)" << endl << endl;
 	cout << "------------------------------------------" << endl;
 	cout << "What would you like to do?(type the command help if unsure): ";
 	string userAnswer;
@@ -673,8 +676,15 @@ int main()
 	int elapsed((int)end - (int)start);
 	int seconds = elapsed / CLOCKS_PER_SEC;
 	int minutes = seconds / 60;
-	updateWorkingTasks(minutes);
-	rewrite();
+
+	//Try to open task list for reading
+	//if no task list exists then we don't need to update anything and can exit
+	ifstream openTask("tasklist.txt");
+	if (openTask.is_open())
+	{
+		updateWorkingTasks(minutes);
+		rewrite();
+	}
 	cout << endl << endl << minutes << " minutes have elapsed." << endl << endl;
 	system("pause");
 	return 0;
