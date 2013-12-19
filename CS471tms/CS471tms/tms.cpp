@@ -145,19 +145,36 @@ vector<Task>::iterator findTask(const string & taskName)
 	return _loadedTasks.end();
 }
 
+//Function that checks if the task that the user is trying to delete
+//has a dependency of another task in the task list that is not archived
+bool checkDependency(vector<Task>::iterator taskName)
+{
+	//iterate through vector to check if existing task has a dependency that is not archived
+	for (int y = 0; y < _loadedTasks.size(); ++y)
+	{
+		if (taskName->dependance == _loadedTasks[y].taskName && _loadedTasks[y].archived == false)
+		{
+			cout << "You cannot delete this task. You must complete task " << _loadedTasks[y].taskName << "first." << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
 //Function that deletes a task that was requested by the user
 void deleteTask(string & taskName)
 {
 	auto taskToDelete = findTask(taskName);
+	bool safeDependence = checkDependency(taskToDelete);
 	if (taskToDelete == _loadedTasks.end())
 	{
 		return;
 	}
-	if (taskToDelete->talloc == 0)
+	if (taskToDelete->talloc == 0 && safeDependence == true)
 	{
 		_loadedTasks.erase(taskToDelete);
 	}
-	else
+	else if (taskToDelete->talloc > 0 && safeDependence == true)
 	{
 		cout << endl << "You cannot delete a task that you have time allocated to" << endl;
 	}
@@ -684,6 +701,7 @@ void displayMainMenu()
 	else
 	{
 		cout << "You entered an invalid command. Please try again, type help if your lost!: " << endl;
+		cin.ignore(1000, '\n');
 		displayMainMenu();
 	}
 }
@@ -705,7 +723,7 @@ int main()
 		updateWorkingTasks(minutes);
 		rewrite();
 	}
-	cout << endl << endl << minutes << " minutes have elapsed." << endl << endl;
+	//cout << endl << endl << minutes << " minutes have elapsed." << endl << endl;
 	system("pause");
 	return 0;
 }
